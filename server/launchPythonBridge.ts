@@ -100,20 +100,13 @@ export async function startPythonBridge(): Promise<void> {
 
     pythonProcess.stdout?.on('data', (data) => {
       const output = data.toString();
-      // Only show important messages
-      if (output.includes('PythonBridge') || 
-          output.includes('Running on') || 
-          output.includes('initialized') ||
-          output.includes('Error')) {
-        console.log(`[Python Bridge] ${output.trim()}`);
-      }
       
       // Check if server is ready
       if (output.includes('Running on') || output.includes('http://127.0.0.1:5000')) {
         if (!resolved) {
           resolved = true;
           clearTimeout(startupTimeout);
-          console.log('✅ Python Bridge ready on http://localhost:5000');
+          console.log('\n✅ Python Bridge ready on http://localhost:5000\n');
           resolve();
         }
       }
@@ -121,9 +114,10 @@ export async function startPythonBridge(): Promise<void> {
 
     pythonProcess.stderr?.on('data', (data) => {
       const error = data.toString();
-      // Only show actual errors, not warnings
-      if (error.includes('Error') || error.includes('Failed') || error.includes('Exception')) {
-        console.error(`[Python Bridge Error] ${error.trim()}`);
+      // Only show critical errors
+      if (error.includes('ModuleNotFoundError') || error.includes('ImportError') || 
+          error.includes('SyntaxError') || error.includes('Exception:')) {
+        console.error(`\n❌ Python Bridge Error: ${error.trim()}\n`);
       }
     });
 

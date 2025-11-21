@@ -152,15 +152,13 @@ async function startServer() {
     
     // Start Express server
     app.listen(PORT, () => {
-      console.log('\n' + '='.repeat(60));
-      console.log('🚀 Cipher Computer Use System Ready!');
-      console.log('='.repeat(60));
-      console.log(`🤖 Agent Server: http://localhost:${PORT}`);
-      console.log(`🐍 Python Bridge: http://localhost:5000`);
-      console.log(`📡 Convex: ${convexUrl}`);
-      console.log('='.repeat(60));
-      console.log('✅ All systems operational!');
-      console.log('='.repeat(60) + '\n');
+      console.log('\n' + '='.repeat(50));
+      console.log('  🚀 CIPHER - All Systems Ready!');
+      console.log('='.repeat(50));
+      console.log(`  🤖 Agent Server → http://localhost:${PORT}`);
+      console.log(`  🐍 Python Bridge → http://localhost:5000`);
+      console.log('='.repeat(50) + '\n');
+      console.log('  ✅ Ready for automation!\n');
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
