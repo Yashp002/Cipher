@@ -25,24 +25,36 @@ def setup_python_bridge():
         subprocess.check_call([sys.executable, '-m', 'venv', str(venv_dir)])
         print("✅ Virtual environment created")
     
-    # Determine pip path
+    # Determine python path - check both locations
     if os.name == 'nt':  # Windows
-        pip_path = venv_dir / 'Scripts' / 'pip.exe'
-        python_path = venv_dir / 'Scripts' / 'python.exe'
+        # Try both Scripts and bin directories
+        scripts_python = venv_dir / 'Scripts' / 'python.exe'
+        bin_python = venv_dir / 'bin' / 'python.exe'
+        bin_python_noext = venv_dir / 'bin' / 'python'
+        
+        if scripts_python.exists():
+            python_path = scripts_python
+        elif bin_python.exists():
+            python_path = bin_python
+        elif bin_python_noext.exists():
+            python_path = bin_python_noext
+        else:
+            python_path = scripts_python  # Default fallback
     else:  # Unix-like
-        pip_path = venv_dir / 'bin' / 'pip'
         python_path = venv_dir / 'bin' / 'python'
     
     # Upgrade pip
     print("⬆️  Upgrading pip...")
-    subprocess.check_call([str(python_path), '-m', 'pip', 'install', '--upgrade', 'pip'], 
-                         stdout=subprocess.DEVNULL)
+    try:
+        subprocess.check_call([str(python_path), '-m', 'pip', 'install', '--upgrade', 'pip'], 
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except:
+        print("⚠️  Pip upgrade skipped")
     
     # Install requirements
     if requirements_file.exists():
         print("📚 Installing dependencies...")
-        subprocess.check_call([str(pip_path), 'install', '-r', str(requirements_file)],
-                            stdout=subprocess.DEVNULL)
+        subprocess.check_call([str(python_path), '-m', 'pip', 'install', '-r', str(requirements_file)])
         print("✅ Dependencies installed")
     
     print("=" * 60)
