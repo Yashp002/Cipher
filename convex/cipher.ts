@@ -2,7 +2,7 @@ import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-const GEMINI_API_KEY = "AIzaSyCmnge11kuE2QWmj_2OHYcpklDqq0QUcf8";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
 
 export const saveCommand = mutation({

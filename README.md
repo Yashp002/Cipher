@@ -26,12 +26,26 @@ npm install
 
 ### 3. Environment Variables
 
-Create a `.env.local` file in the root directory and add any required API keys:
+Copy the `.env.example` file to create your own `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Then edit `.env.local` and add your actual API keys:
 
 ```
-# Add your environment variables here
-VITE_API_KEY=your_api_key_here
+# Convex Backend Configuration
+CONVEX_DEPLOY_KEY=your_convex_deploy_key_here
+CONVEX_DEPLOYMENT=your_convex_deployment_here
+VITE_CONVEX_URL=your_convex_url_here
+
+# Gemini AI API Key
+# Get your API key from: https://makersuite.google.com/app/apikey
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
+
+**Important**: Never commit your `.env.local` file to Git. It's already in `.gitignore` to keep your API keys safe.
 
 ### 4. Fix PowerShell Execution Policy (Windows Only)
 
