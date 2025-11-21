@@ -13,10 +13,11 @@ export function IntelligentCipherInterface() {
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [autoListening, setAutoListening] = useState(true); // Auto mode enabled by default
+  const [autoListening, setAutoListening] = useState(false); // Start with auto mode OFF
   const isProcessingRef = useRef(false);
   const lastCommandRef = useRef("");
   const lastCommandTimeRef = useRef(0);
+  const [systemStatus, setSystemStatus] = useState({ agentServer: false, pythonBridge: false });
   
   const interfaceRef = useRef<HTMLDivElement>(null);
   
@@ -33,6 +34,31 @@ export function IntelligentCipherInterface() {
   };
   
   const settings = voiceSettings || defaultSettings;
+
+  // Check system status periodically
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/health').catch(() => null);
+        if (response && response.ok) {
+          const data = await response.json();
+          setSystemStatus({
+            agentServer: true,
+            pythonBridge: data.pythonBridge?.available || false
+          });
+        } else {
+          setSystemStatus({ agentServer: false, pythonBridge: false });
+        }
+      } catch {
+        setSystemStatus({ agentServer: false, pythonBridge: false });
+      }
+    };
+
+    checkStatus();
+    const interval = setInterval(checkStatus, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Check if command requires computer automation
   const requiresAutomation = (command: string): boolean => {
@@ -245,10 +271,17 @@ export function IntelligentCipherInterface() {
     const newValue = !autoListening;
     setAutoListening(newValue);
     
-    if (newValue && state === "idle") {
+    // Check if services are available before enabling
+    if (newValue) {
+      if (!systemStatus.agentServer || !systemStatus.pythonBridge) {
+        toast.error("⚠️ Please start the services first (npm run dev)");
+        return;
+      }
       setState("listening");
-    } else if (!newValue && state === "listening") {
+      toast.success("🎤 Auto Mode enabled - Just speak!");
+    } else {
       setState("idle");
+      toast.info("Auto Mode disabled");
     }
   };
 
@@ -386,6 +419,25 @@ export function IntelligentCipherInterface() {
           {/* Expanded content */}
           {isExpanded && (
             <div className="px-3 pb-3 space-y-4">
+              {/* System Status */}
+              <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700">
+                <div className="text-white text-xs font-semibold mb-2">🔌 System Status</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-400">Agent Server:</span>
+                    <span className={systemStatus.agentServer ? "text-green-400" : "text-red-400"}>
+                      {systemStatus.agentServer ? "✅ Running" : "❌ Offline"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-400">Python Bridge:</span>
+                    <span className={systemStatus.pythonBridge ? "text-green-400" : "text-red-400"}>
+                      {systemStatus.pythonBridge ? "✅ Running" : "❌ Offline"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Auto listening toggle */}
               <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg">
                 <div>
@@ -397,6 +449,7 @@ export function IntelligentCipherInterface() {
                   className={`w-12 h-6 rounded-full transition-colors ${
                     autoListening ? "bg-gradient-to-r from-red-600 to-red-700" : "bg-gray-600"
                   }`}
+                  disabled={!systemStatus.agentServer || !systemStatus.pythonBridge}
                 >
                   <div className={`w-5 h-5 bg-white rounded-full transition-transform shadow-lg ${
                     autoListening ? "translate-x-6" : "translate-x-0.5"
@@ -448,8 +501,16 @@ export function IntelligentCipherInterface() {
               </div>
               
               <div className="text-gray-500 text-xs text-center">
-                Drag to move • {autoListening ? "Speaking..." : "Click Auto Mode to start"}
+                Drag to move • {autoListening ? "Listening..." : "Enable Auto Mode to start"}
               </div>
+              
+              {(!systemStatus.agentServer || !systemStatus.pythonBridge) && (
+                <div className="bg-yellow-900/30 rounded-lg p-2 border border-yellow-700/50">
+                  <div className="text-yellow-400 text-xs">
+                    ⚠️ Services not running. Run: <code className="bg-black/30 px-1 rounded">npm run dev</code>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
