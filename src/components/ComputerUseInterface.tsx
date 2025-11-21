@@ -10,6 +10,34 @@ export function ComputerUseInterface() {
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState<Id<"computerUseTasks"> | null>(null);
+  const [systemStatus, setSystemStatus] = useState<{
+    agentServer: boolean;
+    pythonBridge: boolean;
+  }>({ agentServer: false, pythonBridge: false });
+
+  // Check system status on mount and when panel opens
+  useEffect(() => {
+    if (isOpen) {
+      checkSystemStatus();
+    }
+  }, [isOpen]);
+
+  const checkSystemStatus = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/health');
+      if (response.ok) {
+        const data = await response.json();
+        setSystemStatus({
+          agentServer: true,
+          pythonBridge: data.pythonBridge?.available || false,
+        });
+      } else {
+        setSystemStatus({ agentServer: false, pythonBridge: false });
+      }
+    } catch {
+      setSystemStatus({ agentServer: false, pythonBridge: false });
+    }
+  };
 
   const createTask = useMutation(api.computerUse.createTask);
   const currentTask = useQuery(
@@ -26,26 +54,45 @@ export function ComputerUseInterface() {
 
     setIsSubmitting(true);
     try {
+      // First check if agent server is running
+      const healthCheck = await fetch('http://localhost:3001/api/health').catch(() => null);
+      
+      if (!healthCheck || !healthCheck.ok) {
+        toast.error("⚠️ Agent server not running. Start it with: npm run dev:agent");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const healthData = await healthCheck.json();
+      
+      // Check if Python bridge is available
+      if (!healthData.pythonBridge?.available) {
+        toast.error("⚠️ Python Bridge not running. Start it in python_bridge folder!");
+        setIsSubmitting(false);
+        return;
+      }
+
       const taskId = await createTask({ goal, description });
       setCurrentTaskId(taskId);
       
       // Notify the agent service
-      const response = await fetch('/api/computer-use/start', {
+      const response = await fetch('http://localhost:3001/api/computer-use/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskId, goal }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start computer use agent');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to start computer use agent');
       }
 
-      toast.success("Computer Use Agent started!");
+      toast.success("🚀 Computer Use Agent started!");
       setGoal("");
       setDescription("");
     } catch (error) {
       console.error("Failed to start task:", error);
-      toast.error("Failed to start task");
+      toast.error(error instanceof Error ? error.message : "Failed to start task");
     } finally {
       setIsSubmitting(false);
     }
@@ -53,8 +100,8 @@ export function ComputerUseInterface() {
 
   const handleStopTask = async () => {
     try {
-      await fetch('/api/computer-use/stop', { method: 'POST' });
-      toast.info("Stopping agent...");
+      await fetch('http://localhost:3001/api/computer-use/stop', { method: 'POST' });
+      toast.info("⏸️ Stopping agent...");
     } catch (error) {
       console.error("Failed to stop task:", error);
       toast.error("Failed to stop task");
@@ -250,6 +297,34 @@ export function ComputerUseInterface() {
                 </div>
               </div>
             )}
+
+            {/* System Status */}
+            <div className="bg-gray-900/50 rounded-lg p-3 border border-purple-900/20">
+              <h4 className="text-gray-300 text-xs font-semibold mb-2">
+                🔌 System Status
+              </h4>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-400">Agent Server:</span>
+                  <span className={systemStatus.agentServer ? "text-green-400" : "text-red-400"}>
+                    {systemStatus.agentServer ? "✅ Running" : "❌ Offline"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-400">Python Bridge:</span>
+                  <span className={systemStatus.pythonBridge ? "text-green-400" : "text-red-400"}>
+                    {systemStatus.pythonBridge ? "✅ Running" : "❌ Offline"}
+                  </span>
+                </div>
+              </div>
+              {(!systemStatus.agentServer || !systemStatus.pythonBridge) && (
+                <div className="mt-2 pt-2 border-t border-purple-900/20">
+                  <p className="text-yellow-400 text-xs">
+                    ⚠️ Start missing services to use automation
+                  </p>
+                </div>
+              )}
+            </div>
 
             {/* Info Box */}
             <div className="bg-purple-900/20 rounded-lg p-3 border border-purple-700/30">
