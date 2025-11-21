@@ -2,7 +2,7 @@ import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { SignInForm } from "./SignInForm";
 import { SignOutButton } from "./SignOutButton";
-import { IntelligentCipherInterface } from "./components/IntelligentCipherInterface";
+import { SimplifiedCipherInterface } from "./components/SimplifiedCipherInterface";
 import { ComputerUseInterface } from "./components/ComputerUseInterface";
 import { Toaster } from "sonner";
 
@@ -26,10 +26,10 @@ export default function App() {
       
       {/* Cipher Interface - only show when authenticated */}
       <Authenticated>
-        <IntelligentCipherInterface />
+        <SimplifiedCipherInterface />
         <ComputerUseInterface />
       </Authenticated>
-      
+
       <Toaster theme="dark" />
     </div>
   );
