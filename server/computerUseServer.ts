@@ -4,6 +4,14 @@ import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../convex/_generated/api';
 import { ComputerUseAgentPython } from '../src/computerUse/ComputerUseAgentPython';
 import { pythonBridge } from '../src/computerUse/PythonBridgeClient';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+// Load environment variables from .env.local
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: resolve(__dirname, '../.env.local') });
 
 const app = express();
 const PORT = 3001;
@@ -12,7 +20,14 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // Initialize Convex client
-const convexUrl = process.env.VITE_CONVEX_URL || '';
+const convexUrl = process.env.VITE_CONVEX_URL;
+
+if (!convexUrl) {
+  console.error('❌ ERROR: VITE_CONVEX_URL not found in .env.local');
+  console.error('Please make sure .env.local exists with VITE_CONVEX_URL set');
+  process.exit(1);
+}
+
 const convex = new ConvexHttpClient(convexUrl);
 
 // Agent instance
