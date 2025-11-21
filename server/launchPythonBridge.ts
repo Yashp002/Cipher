@@ -2,6 +2,7 @@ import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,7 +17,7 @@ async function ensureSetup(pythonBridgePath: string): Promise<void> {
     const venvPath = path.join(pythonBridgePath, 'venv');
     
     // If venv exists, skip setup
-    if (require('fs').existsSync(venvPath)) {
+    if (fs.existsSync(venvPath)) {
       console.log('✅ Python Bridge already set up');
       resolve();
       return;
