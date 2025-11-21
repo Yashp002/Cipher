@@ -3,6 +3,7 @@ import { api } from "../convex/_generated/api";
 import { SignInForm } from "./SignInForm";
 import { SignOutButton } from "./SignOutButton";
 import { CipherInterface } from "./components/CipherInterface";
+import { ComputerUseInterface } from "./components/ComputerUseInterface";
 import { Toaster } from "sonner";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
       {/* Cipher Interface - only show when authenticated */}
       <Authenticated>
         <CipherInterface />
+        <ComputerUseInterface />
       </Authenticated>
       
       <Toaster theme="dark" />
@@ -61,16 +63,17 @@ function Content() {
             <div className="bg-gray-900/50 rounded-lg p-6 shadow-lg border border-red-900/30">
               <h3 className="text-lg font-semibold mb-3 text-white">Getting Started</h3>
               <div className="space-y-2 text-sm text-gray-300">
-                <p>• Click <strong className="text-red-400">"Start Listening"</strong> in the floating interface</p>
-                <p>• Try: "Play Riptide on YouTube"</p>
-                <p>• Try: "What time is it?"</p>
-                <p>• Try: "Search for weather forecast"</p>
-                <p>• Try: "Calculate 25 times 4"</p>
-                <p>• Try: "Open YouTube and Google"</p>
+                <p>🎤 <strong className="text-red-400">Voice Commands</strong>:</p>
+                <p className="ml-4">• "Play Riptide on YouTube"</p>
+                <p className="ml-4">• "What time is it?"</p>
+                <p className="ml-4">• "Calculate 25 times 4"</p>
+                <p className="mt-3">🤖 <strong className="text-purple-400">Computer Use Agent</strong>:</p>
+                <p className="ml-4">• Click the robot icon (bottom right)</p>
+                <p className="ml-4">• Tell it any task to automate!</p>
               </div>
               <div className="mt-4 p-3 bg-green-900/20 rounded border border-green-700/30">
                 <p className="text-xs text-green-400">✨ Powered by Google Gemini AI</p>
-                <p className="text-xs text-gray-400 mt-1">Natural language understanding for smart command processing</p>
+                <p className="text-xs text-gray-400 mt-1">Natural language understanding + computer vision for advanced automation</p>
               </div>
             </div>
             <div className="text-sm text-gray-500">
