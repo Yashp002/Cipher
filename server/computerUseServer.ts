@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../convex/_generated/api';
-import { ComputerUseAgent } from '../src/computerUse/ComputerUseAgent';
+import { ComputerUseAgentPython } from '../src/computerUse/ComputerUseAgentPython';
+import { pythonBridge } from '../src/computerUse/PythonBridgeClient';
 
 const app = express();
 const PORT = 3001;
@@ -15,13 +16,13 @@ const convexUrl = process.env.VITE_CONVEX_URL || '';
 const convex = new ConvexHttpClient(convexUrl);
 
 // Agent instance
-let agent: ComputerUseAgent | null = null;
+let agent: ComputerUseAgentPython | null = null;
 
 // Initialize agent
 function initializeAgent() {
   if (agent) return agent;
 
-  agent = new ComputerUseAgent(
+  agent = new ComputerUseAgentPython(
     // Analyze callback
     async (screenshotBase64, goal, stepNumber, previousSteps) => {
       const response: any = await convex.action(api.computerUse.analyzeScreenshot, {
@@ -113,11 +114,17 @@ app.get('/api/computer-use/status', async (req, res) => {
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const pythonBridgeAvailable = await pythonBridge.isAvailable();
+  
   res.json({ 
-    status: 'ok', 
+    status: pythonBridgeAvailable ? 'ok' : 'degraded', 
     timestamp: new Date().toISOString(),
-    agentRunning: agent?.getStatus().isRunning || false
+    agentRunning: agent?.getStatus().isRunning || false,
+    pythonBridge: {
+      available: pythonBridgeAvailable,
+      url: 'http://localhost:5000'
+    }
   });
 });
 
