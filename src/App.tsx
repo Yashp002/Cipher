@@ -2,7 +2,7 @@ import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { SignInForm } from "./SignInForm";
 import { SignOutButton } from "./SignOutButton";
-import { CipherInterface } from "./components/CipherInterface";
+import { IntelligentCipherInterface } from "./components/IntelligentCipherInterface";
 import { ComputerUseInterface } from "./components/ComputerUseInterface";
 import { Toaster } from "sonner";
 
@@ -26,7 +26,7 @@ export default function App() {
       
       {/* Cipher Interface - only show when authenticated */}
       <Authenticated>
-        <CipherInterface />
+        <IntelligentCipherInterface />
         <ComputerUseInterface />
       </Authenticated>
       
@@ -63,17 +63,20 @@ function Content() {
             <div className="bg-gray-900/50 rounded-lg p-6 shadow-lg border border-red-900/30">
               <h3 className="text-lg font-semibold mb-3 text-white">Getting Started</h3>
               <div className="space-y-2 text-sm text-gray-300">
-                <p>🎤 <strong className="text-red-400">Voice Commands</strong>:</p>
-                <p className="ml-4">• "Play Riptide on YouTube"</p>
-                <p className="ml-4">• "What time is it?"</p>
+                <p>🎯 <strong className="text-blue-400">Intelligent Auto Mode</strong>:</p>
+                <p className="ml-4">• Just speak - Cipher decides what to do!</p>
+                <p className="ml-4">• "Open Calculator" → Automated</p>
+                <p className="ml-4">• "What time is it?" → Voice response</p>
+                <p className="ml-4">• Toggle Auto Mode in the interface</p>
+                <p className="mt-3">💬 <strong className="text-red-400">Try Saying</strong>:</p>
+                <p className="ml-4">• "Play music on YouTube"</p>
+                <p className="ml-4">• "Open Notepad and write hello"</p>
                 <p className="ml-4">• "Calculate 25 times 4"</p>
-                <p className="mt-3">🤖 <strong className="text-purple-400">Computer Use Agent</strong>:</p>
-                <p className="ml-4">• Click the robot icon (bottom right)</p>
-                <p className="ml-4">• Tell it any task to automate!</p>
+                <p className="ml-4">• "What's the weather?"</p>
               </div>
-              <div className="mt-4 p-3 bg-green-900/20 rounded border border-green-700/30">
-                <p className="text-xs text-green-400">✨ Powered by Google Gemini AI</p>
-                <p className="text-xs text-gray-400 mt-1">Natural language understanding + computer vision for advanced automation</p>
+              <div className="mt-4 p-3 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded border border-blue-700/30">
+                <p className="text-xs text-blue-400 font-semibold">⚡ Full Auto Intelligence</p>
+                <p className="text-xs text-gray-400 mt-1">Gemini AI automatically decides between voice response and computer automation</p>
               </div>
             </div>
             <div className="text-sm text-gray-500">

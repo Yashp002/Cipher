@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as auth from "../auth.js";
 import type * as cipher from "../cipher.js";
+import type * as computerUse from "../computerUse.js";
 import type * as http from "../http.js";
 import type * as router from "../router.js";
 
@@ -29,6 +30,7 @@ import type * as router from "../router.js";
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   cipher: typeof cipher;
+  computerUse: typeof computerUse;
   http: typeof http;
   router: typeof router;
 }>;
