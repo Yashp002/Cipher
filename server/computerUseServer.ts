@@ -4,6 +4,7 @@ import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../convex/_generated/api';
 import { ComputerUseAgentPython } from '../src/computerUse/ComputerUseAgentPython';
 import { pythonBridge } from '../src/computerUse/PythonBridgeClient';
+import { startPythonBridge, stopPythonBridge } from './launchPythonBridge';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
@@ -143,11 +144,32 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🤖 Computer Use Agent server running on http://localhost:${PORT}`);
-  console.log(`📡 Convex URL: ${convexUrl}`);
-  console.log(`✅ Ready to receive tasks!`);
-});
+// Start Python Bridge first, then start Express server
+async function startServer() {
+  try {
+    // Start Python Bridge
+    await startPythonBridge();
+    
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log('\n' + '='.repeat(60));
+      console.log('🚀 Cipher Computer Use System Ready!');
+      console.log('='.repeat(60));
+      console.log(`🤖 Agent Server: http://localhost:${PORT}`);
+      console.log(`🐍 Python Bridge: http://localhost:5000`);
+      console.log(`📡 Convex: ${convexUrl}`);
+      console.log('='.repeat(60));
+      console.log('✅ All systems operational!');
+      console.log('='.repeat(60) + '\n');
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start everything
+startServer();
 
 // Graceful shutdown
 process.on('SIGINT', () => {
@@ -155,7 +177,8 @@ process.on('SIGINT', () => {
   if (agent) {
     agent.stopTask();
   }
-  process.exit(0);
+  stopPythonBridge();
+  setTimeout(() => process.exit(0), 1000);
 });
 
 process.on('SIGTERM', () => {
@@ -163,5 +186,6 @@ process.on('SIGTERM', () => {
   if (agent) {
     agent.stopTask();
   }
-  process.exit(0);
+  stopPythonBridge();
+  setTimeout(() => process.exit(0), 1000);
 });
